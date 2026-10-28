@@ -1,0 +1,45 @@
+# Planar (2D) quadrotor, parameterised after a Crazyflie 2.x.
+#
+# PROVENANCE — every number has a source. None are invented.
+#
+#   m, L, I   Bitcraze community parameter set, github.com/orgs/bitcraze/discussions/41
+#             Bitcraze themselves flag these as approximate and point to the ETH
+#             thesis "System Identification of the Crazyflie 2.0 Nano
+#             Quadrocopter" for calibrated values. Treat as representative of
+#             the machine class, not as a calibration of one airframe.
+#
+#   I         Iyy = 1.6656e-5 kg m^2 — the PITCH axis, which is the one a
+#             planar model rotates about. (Ixx = 1.6572e-5; Bitcraze note the
+#             two should be equal and the difference is measurement scatter.)
+#
+#   T_max     Thrust-to-weight for this class is ~2. Weight = m*g = 0.265 N, so
+#             total available thrust ~0.53 N, i.e. 0.265 N per planar rotor.
+#             This is the parameter a first attempt gets wrong: at T/W = 1.21
+#             the closed loop tumbles to 592 deg rather than merely tracking
+#             badly, because once |theta| > 90 deg the thrust points downward.
+#
+# THE PLANAR ABSTRACTION. A real quadrotor has four rotors; this model has two,
+# each standing for one side of the machine. It keeps what matters for control
+# — nonlinear, underactuated, cannot translate without tilting — and drops what
+# needs machinery cf does not have yet: SO(3) attitude (CLAUDE.md S8) and
+# control allocation from 4 rotors to thrust+torques (allocate/, never built).
+
+params:
+  m: 0.027        # mass                                  [kg]
+  L: 0.042        # moment arm, centre to rotor           [m]
+  I: 1.6656e-5    # pitch inertia about the centre of mass [kg m^2]
+  g: 9.81         # gravity                               [m/s^2]
+
+bounds:
+  u:
+    # Per-rotor thrust. Lower bound is 0: a rotor cannot pull.
+    T1: [0.0, 0.265]
+    T2: [0.0, 0.265]
+
+uncertainty:
+  type: parametric
+  ranges:
+    m: [0.025, 0.035]      # battery, deck, tape
+    I: [1.2e-5, 2.2e-5]    # the least well known of the four
+
+dt_nominal: 0.002          # 500 Hz, a plausible attitude-loop rate

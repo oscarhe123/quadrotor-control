@@ -1,0 +1,56 @@
+# 6-DOF quadrotor in a plus configuration, parameterised after a Crazyflie 2.x.
+#
+# PROVENANCE
+#   m, L, Ixx, Iyy, Izz
+#       Bitcraze community parameter set,
+#       github.com/orgs/bitcraze/discussions/41
+#       Bitcraze flag these as approximate and point to the ETH thesis
+#       "System Identification of the Crazyflie 2.0 Nano Quadrocopter" for
+#       calibrated values. Representative of the machine class, not a
+#       calibration of one airframe. Note Ixx and Iyy differ only by
+#       measurement scatter; they should be equal by symmetry.
+#
+#   c   Drag-torque to thrust ratio, from the same source's coefficients:
+#       k/b = 1e-6 / 4.38e-5 = 0.0228 m. This is what makes yaw controllable
+#       at all - a quadrotor yaws by unbalancing rotor DRAG, not thrust, and
+#       it is by far the weakest of the four control channels.
+#
+#   f_max   Per rotor. Thrust-to-weight for this class is ~2, so total 0.53 N
+#           over four rotors.
+#
+# GEOMETRY: plus configuration, z up.
+#   rotor 1 at +x (front)   rotor 3 at -x (back)
+#   rotor 2 at +y (left)    rotor 4 at -y (right)
+#   1 and 3 spin one way, 2 and 4 the other, so their drag torques cancel at
+#   hover and differ when you want yaw.
+
+params:
+  m:   0.027         # mass                             [kg]
+  L:   0.042         # centre to rotor                  [m]
+  Ixx: 1.6572e-5     # roll inertia                     [kg m^2]
+  Iyy: 1.6656e-5     # pitch inertia                    [kg m^2]
+  Izz: 2.9262e-5     # yaw inertia                      [kg m^2]
+  c:   0.0228        # drag torque / thrust             [m]
+  g:   9.81          # gravity                          [m/s^2]
+
+bounds:
+  # Tilt limit. Not an actuator bound - a flight-envelope one, the sort an
+  # operator writes down. LQR cannot see it and will fly straight through;
+  # MPC plans against it. That contrast is the reason it is here.
+  x:
+    phi:   [-0.2618, 0.2618]    # +-15 deg roll
+    theta: [-0.2618, 0.2618]    # +-15 deg pitch
+  u:
+    # A rotor cannot pull. Upper bound gives thrust-to-weight 2.
+    f1: [0.0, 0.1325]
+    f2: [0.0, 0.1325]
+    f3: [0.0, 0.1325]
+    f4: [0.0, 0.1325]
+
+uncertainty:
+  type: parametric
+  ranges:
+    m:   [0.025, 0.035]
+    Izz: [2.2e-5, 3.6e-5]
+
+dt_nominal: 0.002    # 500 Hz

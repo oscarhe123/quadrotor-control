@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+# training by-products; the chosen policy is committed explicitly (see README)
+models/*
+!models/best/
+models/best/*
+!models/best/best_model.zip
+!models/progress.csv

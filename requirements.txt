@@ -1,0 +1,13 @@
+# The control framework this project is built on (models, LQR, MPC, sim, plots).
+cf @ git+https://github.com/oscarhe123/Control-Framework.git
+numpy>=2.0
+scipy
+casadi>=3.6
+osqp>=1.0
+matplotlib>=3.8
+# Reinforcement learning. Install CPU torch first if you have no GPU:
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+torch>=2.2
+stable-baselines3>=2.3
+gymnasium>=1.0
+pytest
